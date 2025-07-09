@@ -1044,6 +1044,28 @@ static const std::vector<Hash> AgentsOfSabotageVehicles = {
     0x70B8833A, //  Emergency           POLFCTION2          polfaction2         Outreach Faction    
 };
 
+static const std::vector<Hash> MoneyFrontsVehicles = {
+    0x14B83FA8, //  Helicopters         MAVERICK2           maverick2           Higgins Helitours Maverick
+    0xE810B452, //  Sedans              DRIFTHARDY          drifthardy          Hardy               
+    0x5E315A37, //  Sedans              HARDY               hardy               Hardy               
+    0xBE5E70B6, //  Sedans              minimus             minimus             Minimus             
+    0xEA76439F, //  Muscle              DRIFTGAUNT4         driftgauntlet4      Gauntlet Hellfire   
+    0x40F546B0, //  Commercial          STOCKADE4           stockade4           Bobcat Security Stockade
+    0x89D676A1, //  Off-Road            DRIFTL352           driftl352           Drift Walton L35    
+    0xA617546C, //  Muscle              TAMPA4              tampa4              Tampa GT            
+    0x293215F3, //  Off-Road            L352                l352                Walton L35 Stock    
+    0x68FB5379, //  Sports              RAPIDGT4            rapidgt4            Rapid GT X          
+    0x1B49B0BC, //  Sedans              DRIFTCHAV6          driftchavosv6       Chavos V6           
+    0x1C18FCE2, //  Sports Classics     CHEETAH3            cheetah3            LSCM Cheetah Classic
+    0x210B9AED, //  SUVs                EVERON3             everon3             Everon RS           
+    0x75397001, //  SUVs                woodlander          woodlander          Woodlander          
+    0x8FC50F21, //  Industrial          FLATBED2            flatbed2            Custom Flatbed      
+    0x28FC5B78, //  Super               SUZUME              suzume              Suzume              
+    0xA17C88F3, //  Sports              SENTINEL5           sentinel5           Sentinel GTS        
+    0xC7FED061, //  Muscle              DRIFTDOM10          driftdominator10    Dominator FX        
+    0x8D780D37, //  Emergency           POLICEB2            policeb2            Police Bike         
+};
+
 inline std::vector<DLCDefinition> buildDLClist() {
     return {
         { DLCDefinition("Original game", OriginalVehicles) },
@@ -1092,5 +1114,6 @@ inline std::vector<DLCDefinition> buildDLClist() {
         { DLCDefinition("The Chop Shop", TheChopShopVehicles) },
         { DLCDefinition("Bottom Dollar Bounties", BottomDollarBountiesVehicles) },
         { DLCDefinition("Agents of Sabotage", AgentsOfSabotageVehicles) },
+        { DLCDefinition("Money Fronts", MoneyFrontsVehicles) },
     };
 }
