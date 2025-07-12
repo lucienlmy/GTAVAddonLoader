@@ -8,6 +8,7 @@
 #include "Util/Logger.hpp"
 #include "Util/Paths.h"
 #include "Util/Util.hpp"
+#include "Util/Versions.h"
 #include "NativeMemory.hpp"
 
 #include "menu.h"
@@ -106,7 +107,7 @@ void resolveImage(Hash selected) {
  * Remove files from the img directory if they aren't present as add-on.
  */
 void cleanImageDirectory(bool backup) {
-    logger.Write(INFO, "Cleaning img dir");
+    LOG(Info, "Cleaning img dir");
     std::string imgPath = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\img";
     std::vector<fs::directory_entry> filesToDiscard;
     for (auto& file : fs::directory_iterator(imgPath)) {
@@ -115,23 +116,22 @@ void cleanImageDirectory(bool backup) {
         Hash hash = joaat(fs::path(file).stem().string());
         if (!STREAMING::IS_MODEL_IN_CDIMAGE(hash)) {
             filesToDiscard.push_back(file);
-            //logger.Write(INFO, "Marked " + fs::path(file).stem().string());
         }
     }
     std::string bakPath;
     if (filesToDiscard.empty()) {
-        logger.Write(INFO, "No files to discard");
+        LOG(Info, "No files to discard");
         return;
     }
-    logger.Write(INFO, "About to discard " + std::to_string(filesToDiscard.size()) + " files");
+    LOG(Info, "About to discard {} files", filesToDiscard.size());
 
     if (backup) {
-        logger.Write(INFO, "Creating bak dir");
+        LOG(Info, "Creating bak dir");
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()
         ).count();
         bakPath = imgPath + "\\bak." + std::to_string(ms);
-        logger.Write(INFO, "Bak dir: " + bakPath);
+        LOG(Info, "Bak dir: " + bakPath);
         fs::create_directory(bakPath);
     }
 
@@ -140,7 +140,6 @@ void cleanImageDirectory(bool backup) {
         std::wstring srcWide = std::wstring(src.begin(), src.end());
         if (backup) {
             std::string dst = bakPath + "\\" + file.path().filename().string();
-            //logger.Write(INFO, "Moving file " + src + " to " + dst);
             std::wstring dstWide = std::wstring(dst.begin(), dst.end());
             MoveFileW(srcWide.c_str(), dstWide.c_str());
         }
@@ -220,9 +219,7 @@ void cacheDLCVehicles(std::vector<DLCDefinition>& dlcs) {
         for (auto hash : dlc.Hashes) {
             if (!STREAMING::IS_MODEL_IN_CDIMAGE(hash))
                 continue;
-            char buffer[128];
-            sprintf_s(buffer, "VEH_CLASS_%i", VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(hash));
-            std::string className = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(buffer);
+            std::string className = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(std::format("VEH_CLASS_{}", VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(hash)).c_str());
             std::string makeName = getMakeName(hash);
             dlc.Vehicles.emplace_back(className, makeName, getModelName(hash), hash);
             dlc.Classes.emplace(className);
@@ -297,7 +294,7 @@ void cacheAddons() {
     thingy << std::left << std::setw(nameLength) << std::setfill(' ') << "Display name";
     thingy << std::left << std::setw(nameLength) << std::setfill(' ') << "Model name";
     thingy << std::left << std::setw(nameLength) << std::setfill(' ') << "GXT name";
-    logger.Write(INFO, thingy.str());
+    LOG(Info, thingy.str());
 
     for (auto hash : allVehicles) {
         char buffer[128];
@@ -319,7 +316,7 @@ void cacheAddons() {
             logStream << std::left << std::setw(nameLength) << std::setfill(' ') << displayName;
             logStream << std::left << std::setw(nameLength) << std::setfill(' ') << getModelName(hash);
             logStream << std::left << std::setw(nameLength) << std::setfill(' ') << getGxtName(hash);
-            logger.Write(INFO, logStream.str());
+            LOG(Info, logStream.str());
             g_addonVehiclesAll.emplace_back(className, makeName, getModelName(hash), hash);
         }
         const auto& [inUserDlc, userDlcNotes] = isHashInDLCList(g_userDlcs, hash);
@@ -569,9 +566,9 @@ void reloadUserDlc() {
 
     // Remove user DLC from "normal" add-on pool.
     for (const auto& dlc : g_userDlcs) {
-        logger.Write(INFO, "[User] DLC Name: %s", dlc.Name.c_str());
+        LOG(Info, "[User] DLC Name: {}", dlc.Name);
         for (const auto& entry : dlc.Vehicles) {
-            logger.Write(INFO, "[User]         : 0x%X / %s", entry.ModelHash, entry.ModelName.c_str());
+            LOG(Info, "[User]         : 0x{:X} / {}", entry.ModelHash, entry.ModelName);
         }
     }
 
@@ -591,7 +588,7 @@ void ScriptInit() {
     menu.ReadSettings();
     menu.Initialize();
 
-    logger.Write(INFO, "Settings read");
+    LOG(Info, "Settings read");
 
     std::string cacheFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\hashes.cache";
     checkCache(cacheFile); // TODO: This is the prepare section
@@ -602,7 +599,7 @@ void ScriptInit() {
     cacheDLCs();
     reloadUserDlc();
 
-    logger.Write(INFO, "Initialization finished");
+    LOG(Info, "Initialization finished");
 }
 
 void InitTextures() {
@@ -611,6 +608,7 @@ void InitTextures() {
     Hash hash = joaat("noimage");
     std::string fileName = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\img\\noimage.png";
     if (FileExists(fileName)) {
+        // TODO: Replace noimage.png if it matches the crashy one?
         auto dims = GetIMGDimensions(fileName);
         unsigned width;
         unsigned height;
@@ -629,7 +627,7 @@ void InitTextures() {
         unsigned width = 480;
         unsigned height = 270;
         noImage = AddonImage(-1, hash, width, height);
-        logger.Write(ERROR, "Missing img/noimage.png!");
+        LOG(Error, "Missing img/noimage.png!");
     }
 
     for (const auto& [modelHash, modelName] : g_vehicleHashes) {
@@ -648,12 +646,12 @@ void ScriptTick() {
 
 void ScriptMain() {
     if (!initialized) {
-        logger.Write(INFO, "Script started");
+        LOG(Info, "Script started");
         ScriptInit();
         initialized = true;
     }
     else {
-        logger.Write(INFO, "Script restarted");
+        LOG(Info, "Script restarted");
     }
     InitTextures();
     ScriptTick();

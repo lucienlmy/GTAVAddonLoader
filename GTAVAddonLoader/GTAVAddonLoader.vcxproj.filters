@@ -46,18 +46,6 @@
   <ItemGroup>
     <ClInclude Include="script.h" />
     <ClInclude Include="settings.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="Util\Versions.h">
       <Filter>Util</Filter>
     </ClInclude>
@@ -106,6 +94,21 @@
     <ClInclude Include="..\thirdparty\GTAVMenuBase\menumemutils.hpp">
       <Filter>Menu</Filter>
     </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h">
+      <Filter>thirdparty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h">
+      <Filter>thirdparty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h">
+      <Filter>thirdparty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h">
+      <Filter>thirdparty\ScriptHookV</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h">
+      <Filter>thirdparty\ScriptHookV</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Menu">
@@ -114,19 +117,19 @@
     <Filter Include="Util">
       <UniqueIdentifier>{c645b72d-ff91-452e-a853-5a39780dac01}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SDK">
-      <UniqueIdentifier>{f35098a6-2e30-436c-9f96-a5d325064032}</UniqueIdentifier>
-    </Filter>
     <Filter Include="thirdparty">
       <UniqueIdentifier>{371be4fb-f341-4041-adea-08b5ef342bb0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Memory">
       <UniqueIdentifier>{99f880a3-306a-43ff-b7b2-432e57255433}</UniqueIdentifier>
     </Filter>
+    <Filter Include="thirdparty\ScriptHookV">
+      <UniqueIdentifier>{0d7c8cbe-838a-4c1a-9cae-6734255418a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib">
-      <Filter>SDK</Filter>
+      <Filter>thirdparty\ScriptHookV</Filter>
     </Library>
   </ItemGroup>
 </Project>

@@ -20,7 +20,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
@@ -89,7 +89,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
       <WarningLevel>Level3</WarningLevel>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty;$(SolutionDir)thirdparty\ScriptHookV_SDK;$(SolutionDir)thirdparty\GTAVMenuBase</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -105,7 +105,7 @@
       <Command>PostBuild.bat $(ProjectDir)$(OutDir) "E:\Games\Steam\steamapps\common\Grand Theft Auto V" $(TargetFileName)</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>copy /b $(ProjectDir)main.cpp +,,</Command>
+      <Command>Prebuild.bat $(ProjectDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -128,10 +128,6 @@
     <ClCompile Include="Util\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="..\thirdparty\GTAVMenuBase\InstructionalButton.h" />
     <ClInclude Include="..\thirdparty\GTAVMenuBase\menu.h" />
     <ClInclude Include="..\thirdparty\GTAVMenuBase\menucontrols.h" />
@@ -141,6 +137,11 @@
     <ClInclude Include="..\thirdparty\GTAVMenuBase\menuutils.h" />
     <ClInclude Include="..\thirdparty\GTAVMenuBase\Scaleform.h" />
     <ClInclude Include="..\thirdparty\jpegsize.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="ExtraTypes.h" />
     <ClInclude Include="Hooking.h" />
     <ClInclude Include="NativeMemory.hpp" />

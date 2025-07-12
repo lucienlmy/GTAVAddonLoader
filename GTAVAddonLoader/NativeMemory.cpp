@@ -30,7 +30,7 @@ GlobalTable globalTable;
 ScriptTable* scriptTable;
 ScriptHeader* shopController;
 
-CallHook<InitVehicleArchetype_t> * g_InitVehicleArchetype = nullptr;
+CCallHook<InitVehicleArchetype_t> * g_InitVehicleArchetype = nullptr;
 
 extern std::unordered_map<Hash, std::string> g_vehicleHashes;
 
@@ -38,16 +38,16 @@ int gameVersion = getGameVersion();
 
 CVehicleModelInfo* initVehicleArchetype_stub(const char* name, bool a2, unsigned int a3) {
     g_vehicleHashes.insert({ joaat(name), name });
-    return g_InitVehicleArchetype->fn(name, a2, a3);
+    return g_InitVehicleArchetype->mFunc(name, a2, a3);
 }
 
 void setupHooks() {
     auto addr = MemoryAccess::FindPattern("\xE8\x00\x00\x00\x00\x48\x8B\x4D\xE0\x48\x8B\x11", "x????xxxxxxx");
     if (!addr) {
-        logger.Write(ERROR, "Couldn't find InitVehicleArchetype");
+        LOG(Error, "Couldn't find InitVehicleArchetype");
         return;
     }
-    logger.Write(INFO, "Found InitVehicleArchetype at 0x%p", addr);
+    LOG(Info, "Found InitVehicleArchetype at 0x%p", addr);
     g_InitVehicleArchetype = HookManager::SetCall(addr, initVehicleArchetype_stub);
 }
 
@@ -77,13 +77,13 @@ void MemoryAccess::Init() {
             "xxxxxxxxxxx");
 
         if (!addr) {
-            logger.Write(ERROR, "Couldn't find GetModelInfo");
+            LOG(Error, "Couldn't find GetModelInfo");
         }
     }
     else {
         addr = FindPattern("\xEB\x09\x41\x3B\x0A\x74\x54", "xxxxxxx");
         if (!addr) {
-            logger.Write(ERROR, "Couldn't find GetModelInfo (v58+)");
+            LOG(Error, "Couldn't find GetModelInfo (v58+)");
         }
         addr = addr - 0x2C;
     }
@@ -172,8 +172,8 @@ bool MemoryAccess::findShopController() {
     // FindPatterns
     __int64 patternAddr = FindPattern("\x4C\x8D\x05\x00\x00\x00\x00\x4D\x8B\x08\x4D\x85\xC9\x74\x11", "xxx????xxxxxxxx");
     if (!patternAddr) {
-        logger.Write(ERROR, "ERROR: finding address 0");
-        logger.Write(ERROR, "Aborting...");
+        LOG(Error, "ERROR: finding address 0");
+        LOG(Error, "Aborting...");
         return false;
     }
     globalTable.GlobalBasePtr = (__int64**)(patternAddr + *(int*)(patternAddr + 3) + 7);
@@ -181,8 +181,8 @@ bool MemoryAccess::findShopController() {
 
     patternAddr = FindPattern("\x48\x03\x15\x00\x00\x00\x00\x4C\x23\xC2\x49\x8B\x08", "xxx????xxxxxx");
     if (!patternAddr) {
-        logger.Write(ERROR, "ERROR: finding address 1");
-        logger.Write(ERROR, "Aborting...");
+        LOG(Error, "ERROR: finding address 1");
+        LOG(Error, "Aborting...");
         return false;
     }
     scriptTable = (ScriptTable*)(patternAddr + *(int*)(patternAddr + 3) + 7);
@@ -194,25 +194,25 @@ bool MemoryAccess::findShopController() {
     while (!globalTable.IsInitialised()) {
         scriptWait(100); //Wait for GlobalInitialisation before continuing
         if (GetTickCount() > startTime + timeout) {
-            logger.Write(ERROR, "ERROR: couldn't init global table");
-            logger.Write(ERROR, "Aborting...");
+            LOG(Error, "ERROR: couldn't init global table");
+            LOG(Error, "Aborting...");
             return false;
         }
     }
     
-    //logger.Write(INFO, "Found global base pointer " + std::to_string((__int64)globalTable.GlobalBasePtr));
+    //LOG(Info, "Found global base pointer " + std::to_string((__int64)globalTable.GlobalBasePtr));
 
     ScriptTableItem* Item = scriptTable->FindScript(0x39DA738B);
     if (Item == NULL) {
-        logger.Write(ERROR, "ERROR: finding address 2");
-        logger.Write(ERROR, "Aborting...");
+        LOG(Error, "ERROR: finding address 2");
+        LOG(Error, "Aborting...");
         return false;
     }
     while (!Item->IsLoaded())
         Sleep(100);
     
     shopController = Item->Header;
-    //logger.Write(INFO, "Found shopcontroller");
+    //LOG(Info, "Found shopcontroller");
     return true;
 }
 
@@ -254,13 +254,13 @@ void MemoryAccess::enableCarsGlobal() {
             if (address)
             {
                 int globalindex = *(int*)(address + offset) & 0xFFFFFF;
-                logger.Write(INFO, "Setting Global Variable " + std::to_string(globalindex) + " to true");
+                LOG(Info, "Setting Global Variable " + std::to_string(globalindex) + " to true");
                 *globalTable.AddressOf(globalindex) = 1;
-                logger.Write(INFO, "MP Cars enabled");
+                LOG(Info, "MP Cars enabled");
                 return;
             }
         }
     }
 
-    logger.Write(ERROR, "Global Variable not found, check game version >= 1.0.678.1");
+    LOG(Error, "Global Variable not found, check game version >= 1.0.678.1");
 }

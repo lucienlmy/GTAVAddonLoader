@@ -1,5 +1,6 @@
 #include "script.h"
 
+#include "GitInfo.h"
 #include "NativeMemory.hpp"
 #include "Util/Logger.hpp"
 #include "Util/Paths.h"
@@ -7,20 +8,23 @@
 
 #include <inc/main.h>
 
-BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved) {
+void initPaths(HMODULE hInstance){
+    Paths::SetOurModuleHandle(hInstance);
     std::string logFile = Paths::GetModuleFolder(hInstance) + modDir +
         "\\" + Paths::GetModuleNameWithoutExtension(hInstance) + ".log";
-    logger.SetFile(logFile);
-    Paths::SetOurModuleHandle(hInstance);
+    gLogger.SetPath(logFile);
+    gLogger.Clear();
+}
 
+BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved) {
     switch (reason) {
     case DLL_PROCESS_ATTACH:
-        logger.Clear();
-        logger.Write(INFO, "Addon Spawner %s (built %s %s)", DISPLAY_VERSION, __DATE__, __TIME__);
-        logger.Write(INFO, "Game version " + eGameVersionToString(getGameVersion()));
+        initPaths(hInstance);
+        LOG(Info, "Add-On Vehicle Spawner {} ({} @ {})", DISPLAY_VERSION, GIT_HASH GIT_DIFF, GIT_DATE);
+        LOG(Info, "Game version - {}", Versions::GetName(getGameVersion()));
         scriptRegister(hInstance, ScriptMain);
         setupHooks();
-        logger.Write(INFO, "Script registered");
+        LOG(Info, "Script registered");
         break;
     case DLL_PROCESS_DETACH:
         scriptUnregister(hInstance);

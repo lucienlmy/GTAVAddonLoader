@@ -91,7 +91,7 @@ void update_searchresults() {
         std::string rawName = name;
         std::string modelName = addonVehicle.ModelName;
         std::string makeNameRaw = MemoryAccess::GetVehicleMakeName(addonVehicle.ModelHash);
-        std::string makeName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(MemoryAccess::GetVehicleMakeName(addonVehicle.ModelHash));
+        std::string makeName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(makeNameRaw.c_str());
 
         if (findSubstring(rawName, searchVehicleName) != -1 ||
             findSubstring(displayName, searchVehicleName) != -1 ||
@@ -133,7 +133,6 @@ void OptionVehicle(const ModelInfo& vehicle) {
     if (!displayMakeName.empty() && displayMakeName != "NULL") {
         optionText = displayMakeName + " " + displayName;
     }
-
     if (menu.OptionPlus(optionText, extras, &visible, nullptr, nullptr, "Vehicle info", vehicle.Notes)) {
         spawnVehicle(vehicle.ModelHash);
     }
@@ -345,7 +344,7 @@ void update_perdlcmenu(const DLCDefinition& dlc, const std::set<std::string>& dl
     }
     if (dlcCats.empty()) {
         menu.Option("DLC unavailable.", { "The dlclist.xml and/or game files do not contain the '" + dlc.Name + "' content.",
-                        "Game version: " + eGameVersionToString(getGameVersion()) });
+                        "Game version: " + Versions::GetName(getGameVersion()) });
     }
 }
 

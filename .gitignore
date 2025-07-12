@@ -361,3 +361,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 changelog.pdf
+GTAVAddonLoader/GitInfo.h
