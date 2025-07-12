@@ -3,11 +3,17 @@
  * Generating vehicle model list: ScriptHookVDotNet source (drp4lyf/zorg93)
  * Getting vehicle modkit IDs:    Unknown Modder
  * Getting textures from dicts:   Unknown Modder
- * Hooking InitVehicleArchetype:  Unknown Modder
+ * InitVehicleArchetype (Legacy): Unknown Modder
+ *                    (Enhanced): avail
  * Find enable mp vehicles:       drp4lyf/zorg93
  */
 
 #include "NativeMemory.hpp"
+
+#include "Hooking.h"
+#include "Util/Logger.hpp"
+#include "Util/Util.hpp"
+#include "Util/Versions.h"
 
 #include <Windows.h>
 #include <Psapi.h>
@@ -16,13 +22,10 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Hooking.h"
+typedef CVehicleModelInfo* (*GetModelInfo_t)(unsigned int modelHash, int* index);
 
-#include "Util/Logger.hpp"
-#include "Util/Util.hpp"
-
-typedef CVehicleModelInfo*(*GetModelInfo_t)(unsigned int modelHash, int* index);
-typedef CVehicleModelInfo*(*InitVehicleArchetype_t)(const char*, bool, unsigned int);
+typedef CVehicleModelInfo* (*InitVehicleArchetype_t)(const char*, bool, unsigned int);
+typedef int64_t(*InitVehicleArchetypeEnhanced_t)(uint32_t a1, const char*);
 
 GetModelInfo_t GetModelInfo;
 
@@ -30,7 +33,8 @@ GlobalTable globalTable;
 ScriptTable* scriptTable;
 ScriptHeader* shopController;
 
-CCallHook<InitVehicleArchetype_t> * g_InitVehicleArchetype = nullptr;
+CCallHook<InitVehicleArchetype_t>* g_InitVehicleArchetype = nullptr;
+CCallHook<InitVehicleArchetypeEnhanced_t>* g_InitVehicleArchetypeEnhanced = nullptr;
 
 extern std::unordered_map<Hash, std::string> g_vehicleHashes;
 
@@ -41,20 +45,40 @@ CVehicleModelInfo* initVehicleArchetype_stub(const char* name, bool a2, unsigned
     return g_InitVehicleArchetype->mFunc(name, a2, a3);
 }
 
+int64_t initVehicleArchetypeEnhanced_stub(uint32_t a1, const char* name) {
+    g_vehicleHashes.insert({ joaat(name), name });
+    return g_InitVehicleArchetypeEnhanced->mFunc(a1, name);
+}
+
 void setupHooks() {
-    auto addr = MemoryAccess::FindPattern("\xE8\x00\x00\x00\x00\x48\x8B\x4D\xE0\x48\x8B\x11", "x????xxxxxxx");
+    uintptr_t addr = 0;
+    if (Versions::IsEnhanced()) {
+        addr = MemoryAccess::FindPattern("\xE8\x00\x00\x00\x00\x43\x89\x44\x2C", "x????xxxx");
+    }
+    else {
+        addr = MemoryAccess::FindPattern("\xE8\x00\x00\x00\x00\x48\x8B\x4D\xE0\x48\x8B\x11", "x????xxxxxxx");
+    }
     if (!addr) {
         LOG(Error, "Couldn't find InitVehicleArchetype");
         return;
     }
-    LOG(Info, "Found InitVehicleArchetype at 0x%p", addr);
-    g_InitVehicleArchetype = HookManager::SetCall(addr, initVehicleArchetype_stub);
+    LOG(Info, "Found InitVehicleArchetype at {}", (void*)addr);
+    if (Versions::IsEnhanced()) {
+        g_InitVehicleArchetypeEnhanced = HookManager::SetCall(addr, initVehicleArchetypeEnhanced_stub);
+    }
+    else {
+        g_InitVehicleArchetype = HookManager::SetCall(addr, initVehicleArchetype_stub);
+    }
 }
 
 void removeHooks() {
     if (g_InitVehicleArchetype) {
         delete g_InitVehicleArchetype;
         g_InitVehicleArchetype = nullptr;
+    }
+    if (g_InitVehicleArchetypeEnhanced) {
+        delete g_InitVehicleArchetypeEnhanced;
+        g_InitVehicleArchetypeEnhanced = nullptr;
     }
 }
 
@@ -79,16 +103,20 @@ void MemoryAccess::Init() {
         if (!addr) {
             LOG(Error, "Couldn't find GetModelInfo");
         }
+        else {
+            GetModelInfo = (GetModelInfo_t)(addr);
+        }
     }
     else {
         addr = FindPattern("\xEB\x09\x41\x3B\x0A\x74\x54", "xxxxxxx");
         if (!addr) {
             LOG(Error, "Couldn't find GetModelInfo (v58+)");
         }
-        addr = addr - 0x2C;
+        else {
+            addr = addr - 0x2C;
+            GetModelInfo = (GetModelInfo_t)(addr);
+        }
     }
-
-    GetModelInfo = (GetModelInfo_t)(addr);
 
     // find enable MP cars patterns
     if (findShopController())
@@ -99,6 +127,9 @@ void MemoryAccess::Init() {
 // Thank you, Unknown Modder!
 template < typename ModelInfo >
 std::vector<uint16_t> GetVehicleModKits_t(int modelHash) {
+    if (!GetModelInfo)
+        return {};
+
     std::vector<uint16_t> modKits;
     int index = 0xFFFF;
     auto* modelInfo = reinterpret_cast<ModelInfo*>(GetModelInfo(modelHash, &index));
@@ -121,28 +152,28 @@ std::vector<uint16_t> MemoryAccess::GetVehicleModKits(int modelHash) {
     }
 }
 
-char *MemoryAccess::GetVehicleGameName(int modelHash) {
+std::string MemoryAccess::GetVehicleMakeName(int modelHash) {
+    if (getGameVersion() >= Versions::EGameVersion::L_1_0_1868_0_STEAM) {
+        const char* nativeName = VEHICLE::GET_MAKE_NAME_FROM_VEHICLE_MODEL(modelHash);
+        return nativeName ? nativeName : std::string();
+    }
+
+    if (!GetModelInfo)
+        return std::string();
+
     int index = 0xFFFF;
     void* modelInfo = GetModelInfo(modelHash, &index);
+    const char* memName = nullptr;
     if (gameVersion < 38) {
-        return ((CVehicleModelInfo*)modelInfo)->m_displayName;
+        memName = ((CVehicleModelInfo*)modelInfo)->m_manufacturerName;
     }
     else {
-        return ((CVehicleModelInfo1290*)modelInfo)->m_displayName;
+        memName = ((CVehicleModelInfo1290*)modelInfo)->m_manufacturerName;
     }
-}
-char *MemoryAccess::GetVehicleMakeName(int modelHash) {
-    int index = 0xFFFF;
-    void* modelInfo = GetModelInfo(modelHash, &index);
-    if (gameVersion < 38) {
-        return ((CVehicleModelInfo*)modelInfo)->m_manufacturerName;
-    }
-    else {
-        return ((CVehicleModelInfo1290*)modelInfo)->m_manufacturerName;
-    }
+    return memName ? memName : std::string();
 }
 
-uintptr_t MemoryAccess::FindPattern(const char *pattern, const char *mask, const char* startAddress, size_t size) {
+uintptr_t MemoryAccess::FindPattern(const char* pattern, const char* mask, const char* startAddress, size_t size) {
     const char* address_end = startAddress + size;
     const auto mask_length = static_cast<size_t>(strlen(mask) - 1);
 
@@ -164,7 +195,7 @@ uintptr_t MemoryAccess::FindPattern(const char* pattern, const char* mask) {
     MODULEINFO modInfo = { };
     GetModuleInformation(GetCurrentProcess(), GetModuleHandle(nullptr), &modInfo, sizeof(MODULEINFO));
 
-    return FindPattern(pattern, mask, reinterpret_cast<const char *>(modInfo.lpBaseOfDll), modInfo.SizeOfImage);
+    return FindPattern(pattern, mask, reinterpret_cast<const char*>(modInfo.lpBaseOfDll), modInfo.SizeOfImage);
 }
 
 // from EnableMPCars by drp4lyf
@@ -199,7 +230,7 @@ bool MemoryAccess::findShopController() {
             return false;
         }
     }
-    
+
     //LOG(Info, "Found global base pointer " + std::to_string((__int64)globalTable.GlobalBasePtr));
 
     ScriptTableItem* Item = scriptTable->FindScript(0x39DA738B);
@@ -210,7 +241,7 @@ bool MemoryAccess::findShopController() {
     }
     while (!Item->IsLoaded())
         Sleep(100);
-    
+
     shopController = Item->Header;
     //LOG(Info, "Found shopcontroller");
     return true;
@@ -245,16 +276,13 @@ void MemoryAccess::enableCarsGlobal() {
         offset = offset1064_0;
     }
 
-    for (int i = 0; i < shopController->CodePageCount(); i++)
-    {
+    for (int i = 0; i < shopController->CodePageCount(); i++) {
         int size = shopController->GetCodePageSize(i);
-        if (size)
-        {
+        if (size) {
             uintptr_t address = FindPattern(pattern, mask, (const char*)shopController->GetCodePageAddress(i), size);
-            if (address)
-            {
+            if (address) {
                 int globalindex = *(int*)(address + offset) & 0xFFFFFF;
-                LOG(Info, "Setting Global Variable " + std::to_string(globalindex) + " to true");
+                LOG(Info, "Setting Global Variable {} to true", globalindex);
                 *globalTable.AddressOf(globalindex) = 1;
                 LOG(Info, "MP Cars enabled");
                 return;

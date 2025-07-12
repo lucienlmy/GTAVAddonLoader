@@ -121,7 +121,7 @@ void onMenuExit() {
 
 void OptionVehicle(const ModelInfo& vehicle) {
     std::string displayName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(vehicle.ModelHash));
-    std::string displayMakeName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(MemoryAccess::GetVehicleMakeName(vehicle.ModelHash));
+    std::string displayMakeName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(MemoryAccess::GetVehicleMakeName(vehicle.ModelHash).c_str());
 
     if (displayName == "NULL") {
         displayName = vehicle.ModelName;

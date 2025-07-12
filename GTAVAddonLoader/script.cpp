@@ -150,13 +150,12 @@ void cleanImageDirectory(bool backup) {
 }
 
 std::string getMakeName(Hash hash) {
-    char* makeName = MemoryAccess::GetVehicleMakeName(hash);
-    if (makeName == nullptr ||
-        strcmp(makeName, "") == 0 ||
-        strcmp(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(makeName), "NULL") == 0) {
+    auto makeName = MemoryAccess::GetVehicleMakeName(hash);
+    if (makeName.empty() ||
+        strcmp(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(makeName.c_str()), "NULL") == 0) {
         return std::string();
     }
-    return std::string(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(makeName));
+    return std::string(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(makeName.c_str()));
 }
 
 std::string getModelName(Hash hash) {
@@ -495,14 +494,19 @@ std::string getImageExtra(Hash addonVehicle) {
 std::vector<std::string> resolveVehicleInfo(const ModelInfo& addonVehicle) {
     std::vector<std::string> extras;
 
-    auto modkits = MemoryAccess::GetVehicleModKits(addonVehicle.ModelHash);
     std::string modkitsInfo;
-    for (auto kit : modkits) {
-        if (kit == modkits.back()) {
-            modkitsInfo += std::to_string(kit);
-        }
-        else {
-            modkitsInfo += std::to_string(kit) + ", ";
+
+    // TODO: GetModelInfo for Enhanced is not implemented
+    // Skip mod kit info.
+    if (!Versions::IsEnhanced()) {
+        auto modkits = MemoryAccess::GetVehicleModKits(addonVehicle.ModelHash);
+        for (auto kit : modkits) {
+            if (kit == modkits.back()) {
+                modkitsInfo += std::to_string(kit);
+            }
+            else {
+                modkitsInfo += std::to_string(kit) + ", ";
+            }
         }
     }
 

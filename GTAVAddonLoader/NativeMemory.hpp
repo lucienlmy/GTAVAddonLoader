@@ -1,8 +1,9 @@
 #pragma once
 
+#include <inc/natives.h>
 #include <cstdint>
+#include <string>
 #include <vector>
-#include "inc/natives.h"
 
 #define STATIC_ASSERT_SIZE(Type, Size) static_assert(sizeof(Type) == Size, "invalid " #Type " size")
 
@@ -19,90 +20,93 @@ typedef uint32_t eVehicleFlag6;
 // Various snippets from FiveM source and Unknown Modder
 #pragma pack(push, 1)
 namespace rage {
-    class fwArchetype {
-    public:
-        virtual ~fwArchetype() = default;
+class fwArchetype {
+public:
+    virtual ~fwArchetype() = default;
 
-        char _0x0008[0x10]; // 0x0000
-        Hash m_hash; // 0x0018
-        char _0x001C[0x10]; // 0x001C
-        float m_radius; // 0x002C
-        float m_aabbMin[4]; // 0x0030
-        float m_aabbMax[4]; // 0x0040
-        uint32_t m_flags; // 0x0050
-        char _0x0054[0x12]; // 0x0054
-        uint16_t m_index; // 0x0066
-    };
+    char _0x0008[0x10]; // 0x0000
+    Hash m_hash; // 0x0018
+    char _0x001C[0x10]; // 0x001C
+    float m_radius; // 0x002C
+    float m_aabbMin[4]; // 0x0030
+    float m_aabbMax[4]; // 0x0040
+    uint32_t m_flags; // 0x0050
+    char _0x0054[0x12]; // 0x0054
+    uint16_t m_index; // 0x0066
+};
 
-    class fwEntity
-    {
-    public:
-        virtual ~fwEntity() = 0;
+class fwEntity {
+public:
+    virtual ~fwEntity() = 0;
 
-        virtual bool IsOfType(uint32_t hash) = 0;
-    };
+    //virtual bool IsOfType(uint32_t hash) = 0;
 
-    class fwArchetypeDef
-    {
-    public:
-        virtual ~fwArchetypeDef();
+    //template<typename T>
+    //bool IsOfType()
+    //{
+    //    return reinterpret_cast<T*>(this->IsOfType(HashString(boost::typeindex::type_id<T>().pretty_name().substr(6).c_str())));
+    //}
+};
 
-        virtual int64_t GetTypeIdentifier();
+class fwArchetypeDef {
+public:
+    virtual ~fwArchetypeDef();
 
-        float lodDist;
-        uint32_t flags; // 0x10000 = alphaclip
-        uint32_t specialAttribute; // lower 5 bits == 31 -> use alpha clip, get masked to 31 in InitializeFromArchetypeDef
-        uint32_t pad;
-        void* pad2;
-        float bbMin[4];
-        float bbMax[4];
-        float bsCentre[4];
-        float bsRadius;
-        float hdTextureDist;
-        uint32_t name;
-        uint32_t textureDictionary;
-        uint32_t clipDictionary;
-        uint32_t drawableDictionary;
-        uint32_t physicsDictionary;
-        uint32_t assetType;
-        uint32_t assetName;
-        uint32_t pad5[7];
+    virtual int64_t GetTypeIdentifier();
 
-    public:
-        fwArchetypeDef()
-        {
-            flags = 0x10000; // was 0x2000
-            lodDist = 299.0f;
-            hdTextureDist = 375.0f;
+    float lodDist;
+    uint32_t flags; // 0x10000 = alphaclip
+    uint32_t specialAttribute; // lower 5 bits == 31 -> use alpha clip, get masked to 31 in InitializeFromArchetypeDef
+    uint32_t pad;
+    void* pad2;
+    float bbMin[4];
+    float bbMax[4];
+    float bsCentre[4];
+    float bsRadius;
+    float hdTextureDist;
+    uint32_t name;
+    uint32_t textureDictionary;
+    uint32_t clipDictionary;
+    uint32_t drawableDictionary;
+    uint32_t physicsDictionary;
+    uint32_t assetType;
+    uint32_t assetName;
+    uint32_t pad5[7];
 
-            drawableDictionary = 0;
-            assetType = 3;
-            assetName = 0x12345678;
+public:
+    fwArchetypeDef() {
+        flags = 0x10000; // was 0x2000
+        lodDist = 299.0f;
+        hdTextureDist = 375.0f;
 
-            specialAttribute = 31;
+        drawableDictionary = 0;
+        assetType = 3;
+        assetName = 0x12345678;
 
-            pad = 0;
-            pad2 = 0;
-            clipDictionary = 0;
-            physicsDictionary = 0;
-            memset(pad5, 0, sizeof(physicsDictionary));
-        }
-    };
+        specialAttribute = 31;
+
+        pad = 0;
+        pad2 = 0;
+        clipDictionary = 0;
+        physicsDictionary = 0;
+        memset(pad5, 0, sizeof(physicsDictionary));
+    }
+};
 
 }
 
-class CBaseModelInfo : public rage::fwArchetype
-{
+class CBaseModelInfo: public rage::fwArchetype {
 public:
     virtual ~CBaseModelInfo() {}
     virtual void Initialize() {}
     virtual void InitializeFromArchetypeDef(uint32_t, rage::fwArchetypeDef*, bool) {}
-    virtual rage::fwEntity* CreateEntity() { return nullptr; }
-    // and lots of other functions...
+    virtual rage::fwEntity* CreateEntity() {
+        return nullptr;
+    }
+// and lots of other functions...
 
 public:
-    eModelType GetModelType() const
-    {
+    eModelType GetModelType() const {
         return m_modelType & 0x1F;
     }
 
@@ -117,14 +121,15 @@ protected:
 
 STATIC_ASSERT_SIZE(CBaseModelInfo, 0xB0);
 
-class CVehicleModelInfo : public CBaseModelInfo
-{
+class CVehicleModelInfo: public CBaseModelInfo {
 public:
     virtual ~CVehicleModelInfo() {}
     virtual void Initialize() {}
     virtual void InitializeFromArchetypeDef(uint32_t, rage::fwArchetypeDef*, bool) {}
-    virtual rage::fwEntity* CreateEntity() { return nullptr; }
-    // and lots of other functions...
+    virtual rage::fwEntity* CreateEntity() {
+        return nullptr;
+    }
+// and lots of other functions...
 
 public:
     void* m_0x00B0; // 0x00B0
@@ -175,14 +180,15 @@ public:
 
 STATIC_ASSERT_SIZE(CVehicleModelInfo, 0x560);
 
-class CVehicleModelInfo1290 : public CBaseModelInfo
-{
+class CVehicleModelInfo1290: public CBaseModelInfo {
 public:
     virtual ~CVehicleModelInfo1290() {}
     virtual void Initialize() {}
     virtual void InitializeFromArchetypeDef(uint32_t, rage::fwArchetypeDef*, bool) {}
-    virtual rage::fwEntity* CreateEntity() { return nullptr; }
-    // and lots of other functions...
+    virtual rage::fwEntity* CreateEntity() {
+        return nullptr;
+    }
+// and lots of other functions...
 
 public:
     void* m_0x00B0; // 0x00B0
@@ -260,12 +266,18 @@ struct ScriptHeader {
     char padding8[12];                    //0x74
                                         //END_OF_HEADER
 
-    bool IsValid() const { return codeLength > 0; }
-    int CodePageCount() const { return (codeLength + 0x3FFF) >> 14; }
+    bool IsValid() const {
+        return codeLength > 0;
+    }
+    int CodePageCount() const {
+        return (codeLength + 0x3FFF) >> 14;
+    }
     int GetCodePageSize(int page) const {
         return (page < 0 || page >= CodePageCount() ? 0 : (page == CodePageCount() - 1) ? codeLength & 0x3FFF : 0x4000);
     }
-    unsigned char* GetCodePageAddress(int page) const { return codeBlocksOffset[page]; }
+    unsigned char* GetCodePageAddress(int page) const {
+        return codeBlocksOffset[page];
+    }
     unsigned char* GetCodePositionAddress(int codePosition) const {
         return codePosition < 0 || codePosition >= codeLength ? NULL : &codeBlocksOffset[codePosition >> 14][codePosition & 0x3FFF];
     }
@@ -295,7 +307,7 @@ struct ScriptTable {
         if (TablePtr == NULL) {
             return NULL;//table initialisation hasnt happened yet
         }
-        for (int i = 0; i<count; i++) {
+        for (int i = 0; i < count; i++) {
             if (TablePtr[i].hash == hash) {
                 return &TablePtr[i];
             }
@@ -306,8 +318,12 @@ struct ScriptTable {
 
 struct GlobalTable {
     __int64** GlobalBasePtr;
-    __int64* AddressOf(int index) const { return &GlobalBasePtr[index >> 18 & 0x3F][index & 0x3FFFF]; }
-    bool IsInitialised()const { return *GlobalBasePtr != NULL; }
+    __int64* AddressOf(int index) const {
+        return &GlobalBasePtr[index >> 18 & 0x3F][index & 0x3FFFF];
+    }
+    bool IsInitialised()const {
+        return *GlobalBasePtr != NULL;
+    }
 };
 
 struct HashNode {
@@ -319,11 +335,10 @@ struct HashNode {
 
 class MemoryAccess {
 public:
-    static uintptr_t FindPattern(const char *pattern, const char *mask, const char *startAddress, size_t size);
+    static uintptr_t FindPattern(const char* pattern, const char* mask, const char* startAddress, size_t size);
     static uintptr_t FindPattern(const char* pattern, const char* mask);
     static void Init();
-    static char *GetVehicleGameName(int modelHash);
-    static char *GetVehicleMakeName(int modelHash);
+    static std::string GetVehicleMakeName(int modelHash);
     static std::vector<uint16_t> GetVehicleModKits(int modelHash);
 private:
     static bool findShopController();
