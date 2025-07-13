@@ -42,6 +42,7 @@
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menuutils.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
+    <ClCompile Include="Images.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
@@ -109,6 +110,9 @@
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h">
       <Filter>thirdparty\ScriptHookV</Filter>
     </ClInclude>
+    <ClInclude Include="noimage_old.h" />
+    <ClInclude Include="noimage_new.h" />
+    <ClInclude Include="Images.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Menu">

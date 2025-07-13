@@ -3,6 +3,7 @@
 #include "settings.h"
 #include "VehicleHashes.h"
 #include "ExtraTypes.h"
+#include "Images.h"
 #include "UserDLC.h"
 
 #include "Util/Logger.hpp"
@@ -598,8 +599,8 @@ void InitTextures() {
 
     Hash hash = joaat("noimage");
     std::string fileName = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\img\\noimage.png";
+    Images::Update(fileName);
     if (FileExists(fileName)) {
-        // TODO: Replace noimage.png if it matches the crashy one?
         auto dims = GetIMGDimensions(fileName);
         unsigned width;
         unsigned height;
