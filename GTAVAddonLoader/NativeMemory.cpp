@@ -153,11 +153,6 @@ std::vector<uint16_t> MemoryAccess::GetVehicleModKits(int modelHash) {
 }
 
 std::string MemoryAccess::GetVehicleMakeName(int modelHash) {
-    if (getGameVersion() >= Versions::EGameVersion::L_1_0_1868_0_STEAM) {
-        const char* nativeName = VEHICLE::GET_MAKE_NAME_FROM_VEHICLE_MODEL(modelHash);
-        return nativeName ? nativeName : std::string();
-    }
-
     if (!GetModelInfo)
         return std::string();
 

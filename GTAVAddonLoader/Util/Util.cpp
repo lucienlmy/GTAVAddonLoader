@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include "../NativeMemory.hpp"
+#include "Versions.h"
 
 namespace fs = std::filesystem;
 
@@ -223,15 +225,6 @@ Hash joaat(std::string s) {
     return hash;
 }
 
-std::string getGxtName(Hash hash) {
-    const char* name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(hash);
-    std::string displayName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(name);
-    if (displayName == "NULL") {
-        displayName = name;
-    }
-    return displayName;
-}
-
 std::string to_lower(std::string data) {
     std::transform(data.begin(), data.end(), data.begin(), ::tolower);
     return data;
@@ -246,4 +239,45 @@ std::string removeSpecialChars(std::string input) {
     input.erase(std::remove(input.begin(), input.end(), ' '), input.end());
     input.erase(std::remove(input.begin(), input.end(), '-'), input.end());
     return input;
+}
+
+std::string Utility::GetGxtName(const std::string& name) {
+    auto gxtMakeName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(name.c_str());
+    if (!gxtMakeName || std::string(gxtMakeName) == "NULL")
+        return std::string();
+
+    return gxtMakeName;
+}
+
+std::string Utility::GetVehicleNameGxt(Hash modelHash) {
+    const char* name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(modelHash);
+    if (!name)
+        return std::string();
+
+    auto gxtName = GetGxtName(name);
+    if (gxtName.empty() || gxtName == "NULL")
+        return name;
+
+    return gxtName;
+}
+
+std::string Utility::GetVehicleClass(Hash modelHash) {
+    return std::format("VEH_CLASS_{}", VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(modelHash));
+}
+
+std::string Utility::GetVehicleClassGxt(Hash modelHash) {
+    return GetGxtName(GetVehicleClass(modelHash));
+}
+
+std::string Utility::GetVehicleMake(Hash modelHash) {
+    if (getGameVersion() >= Versions::EGameVersion::L_1_0_1868_0_STEAM) {
+        const char* nativeName = VEHICLE::GET_MAKE_NAME_FROM_VEHICLE_MODEL(modelHash);
+        return nativeName ? nativeName : std::string();
+    }
+
+    return MemoryAccess::GetVehicleMakeName(modelHash);
+}
+
+std::string Utility::GetVehicleMakeGxt(Hash modelHash) {
+    return GetGxtName(GetVehicleMake(modelHash));
 }

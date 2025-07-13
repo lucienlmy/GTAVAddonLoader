@@ -30,7 +30,6 @@ std::optional<std::pair<uint32_t, uint32_t>> GetWebPDimensions(const std::string
 
 Hash joaat(std::string s);
 std::string removeSpecialChars(std::string input);
-std::string getGxtName(Hash hash); // gxt name from model
 std::string to_lower(std::string data);
 
 /*
@@ -72,4 +71,17 @@ size_t findSubstring(const T& str1, const T& str2, const std::locale& loc = std:
         str2.begin(), str2.end(), my_equal<typename T::value_type>(loc));
     if (it != str1.end()) return it - str1.begin();
     else return -1; // not found
+}
+
+namespace Utility {
+std::string GetGxtName(const std::string& name);
+
+// GetVehicleModel -> In script.cpp as getModelName
+std::string GetVehicleNameGxt(Hash modelHash);
+
+std::string GetVehicleClass(Hash modelHash);
+std::string GetVehicleClassGxt(Hash modelHash);
+
+std::string GetVehicleMake(Hash modelHash);
+std::string GetVehicleMakeGxt(Hash modelHash);
 }

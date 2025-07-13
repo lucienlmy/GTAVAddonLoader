@@ -1,6 +1,7 @@
 #include "script.h"
 #include "menu.h"
 #include "settings.h"
+#include "GitInfo.h"
 #include "ExtraTypes.h"
 #include "NativeMemory.hpp"
 #include "Util/Logger.hpp"
@@ -120,10 +121,10 @@ void onMenuExit() {
 }
 
 void OptionVehicle(const ModelInfo& vehicle) {
-    std::string displayName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(vehicle.ModelHash));
-    std::string displayMakeName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(MemoryAccess::GetVehicleMakeName(vehicle.ModelHash).c_str());
+    std::string displayName = Utility::GetVehicleNameGxt(vehicle.ModelHash);
+    std::string displayMakeName = Utility::GetVehicleMakeGxt(vehicle.ModelHash);
 
-    if (displayName == "NULL") {
+    if (displayName.empty() || displayName == "NULL") {
         displayName = vehicle.ModelName;
     }
     std::vector<std::string> extras = {};
@@ -167,7 +168,7 @@ void update_spawnmenu(const std::string& category, const std::vector<ModelInfo>&
 
 void update_mainmenu(const std::set<std::string>& addonCats) {
     menu.Title("Add-on spawner");
-    menu.Subtitle("~b~" + std::string(DISPLAY_VERSION) + "~w~");
+    menu.Subtitle(std::format("~b~{}{}~w~", DISPLAY_VERSION, GIT_DIFF));
 
     menu.MenuOption("Settings", "settingsmenu");
 

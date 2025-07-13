@@ -149,15 +149,6 @@ void cleanImageDirectory(bool backup) {
     }
 }
 
-std::string getMakeName(Hash hash) {
-    auto makeName = MemoryAccess::GetVehicleMakeName(hash);
-    if (makeName.empty() ||
-        strcmp(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(makeName.c_str()), "NULL") == 0) {
-        return std::string();
-    }
-    return std::string(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(makeName.c_str()));
-}
-
 std::string getModelName(Hash hash) {
     auto modelIt = g_vehicleHashes.find(hash);
     if (modelIt != g_vehicleHashes.end()) return modelIt->second;
@@ -170,10 +161,8 @@ void cacheDLCVehicles() {
         for (auto hash : dlc.Hashes) {
             if (!STREAMING::IS_MODEL_IN_CDIMAGE(hash))
                 continue;
-            char buffer[128];
-            sprintf_s(buffer, "VEH_CLASS_%i", VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(hash));
-            std::string className = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(buffer);
-            std::string makeName = getMakeName(hash);
+            std::string className = Utility::GetVehicleClassGxt(hash);
+            std::string makeName = Utility::GetVehicleMakeGxt(hash);
             auto notes = std::vector<std::string>{ dlc.Name };
             if (!dlc.Note.empty()) {
                 notes.push_back(dlc.Note);
@@ -197,12 +186,12 @@ void cacheDLCVehicles() {
         }
     }
     std::sort(g_dlcVehicles.begin(), g_dlcVehicles.end(), [](const ModelInfo& a1, const ModelInfo& a2) {
-        std::string makeName1 = getMakeName(a1.ModelHash);
-        std::string makeName2 = getMakeName(a2.ModelHash);
+        std::string makeName1 = Utility::GetVehicleMakeGxt(a1.ModelHash);
+        std::string makeName2 = Utility::GetVehicleMakeGxt(a2.ModelHash);
 
         if (makeName1 == makeName2) {
-            std::string modelName1 = getGxtName(a1.ModelHash);
-            std::string modelName2 = getGxtName(a2.ModelHash);
+            std::string modelName1 = Utility::GetVehicleNameGxt(a1.ModelHash);
+            std::string modelName2 = Utility::GetVehicleNameGxt(a2.ModelHash);
             if (modelName1 == modelName2) {
                 return getModelName(a1.ModelHash) < getModelName(a2.ModelHash);
             }
@@ -218,8 +207,8 @@ void cacheDLCVehicles(std::vector<DLCDefinition>& dlcs) {
         for (auto hash : dlc.Hashes) {
             if (!STREAMING::IS_MODEL_IN_CDIMAGE(hash))
                 continue;
-            std::string className = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(std::format("VEH_CLASS_{}", VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(hash)).c_str());
-            std::string makeName = getMakeName(hash);
+            std::string className = Utility::GetVehicleClassGxt(hash);
+            std::string makeName = Utility::GetVehicleMakeGxt(hash);
             dlc.Vehicles.emplace_back(className, makeName, getModelName(hash), hash);
             dlc.Classes.emplace(className);
             dlc.Makes.emplace(makeName);
@@ -271,12 +260,12 @@ void cacheAddons() {
     }
 
     std::sort(allVehicles.begin(), allVehicles.end(), [](Hash h1, Hash h2) {
-        std::string makeName1 = getMakeName(h1);
-        std::string makeName2 = getMakeName(h2);
+        std::string makeName1 = Utility::GetVehicleMakeGxt(h1);
+        std::string makeName2 = Utility::GetVehicleMakeGxt(h2);
 
         if (makeName1 == makeName2) {
-            std::string modelName1 = getGxtName(h1);
-            std::string modelName2 = getGxtName(h2);
+            std::string modelName1 = Utility::GetVehicleNameGxt(h1);
+            std::string modelName2 = Utility::GetVehicleNameGxt(h2);
             if (modelName1 == modelName2) {
                 return getModelName(h1) < getModelName(h2);
             }
@@ -296,11 +285,9 @@ void cacheAddons() {
     LOG(Info, thingy.str());
 
     for (auto hash : allVehicles) {
-        char buffer[128];
-        sprintf_s(buffer, "VEH_CLASS_%i", VEHICLE::GET_VEHICLE_CLASS_FROM_NAME(hash));
-        std::string className = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(buffer);
+        std::string className = Utility::GetVehicleClassGxt(hash);
         std::string displayName = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(hash);
-        std::string makeName = getMakeName(hash);
+        std::string makeName = Utility::GetVehicleMakeGxt(hash);
 
         const auto& [inGameDlc, gameDlcNotes] = isHashInDLCList(g_dlcs, hash);
         if (inGameDlc) {
@@ -314,7 +301,7 @@ void cacheAddons() {
             logStream << std::left << std::setw(nameLength) << std::setfill(' ') << className;
             logStream << std::left << std::setw(nameLength) << std::setfill(' ') << displayName;
             logStream << std::left << std::setw(nameLength) << std::setfill(' ') << getModelName(hash);
-            logStream << std::left << std::setw(nameLength) << std::setfill(' ') << getGxtName(hash);
+            logStream << std::left << std::setw(nameLength) << std::setfill(' ') << Utility::GetVehicleNameGxt(hash);
             LOG(Info, logStream.str());
             g_addonVehiclesAll.emplace_back(className, makeName, getModelName(hash), hash);
         }
@@ -340,14 +327,14 @@ bool findStringInNames(const std::string& search, Hash hash) {
     std::string displayName = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(name);
     std::string rawName = name;
     std::string modelName = getModelName(hash);
-    std::string makeNameRaw = MemoryAccess::GetVehicleMakeName(hash);
-    std::string makeName = getMakeName(hash);
+    std::string makeName = Utility::GetVehicleMake(hash);
+    std::string makeNameGxt = Utility::GetVehicleMakeGxt(hash);
 
     if (findSubstring(rawName, search) != -1 ||
         findSubstring(displayName, search) != -1 ||
         findSubstring(modelName, search) != -1 ||
         findSubstring(makeName, search) != -1 ||
-        findSubstring(makeNameRaw, search) != -1) {
+        findSubstring(makeNameGxt, search) != -1) {
         return true;
     }
     return false;
@@ -460,7 +447,7 @@ void spawnVehicle(Hash hash) {
             ENTITY::SET_ENTITY_AS_NO_LONGER_NEEDED(&veh);
         }
 
-        showSubtitle("Spawned " + getGxtName(hash) + " (" + getModelName(hash) + ")");
+        showSubtitle("Spawned " + Utility::GetVehicleNameGxt(hash) + " (" + getModelName(hash) + ")");
     }
     else {
         showSubtitle("Vehicle doesn't exist");
@@ -512,16 +499,16 @@ std::vector<std::string> resolveVehicleInfo(const ModelInfo& addonVehicle) {
 
     extras.push_back(getImageExtra(addonVehicle.ModelHash));
 
-    std::string makeFinal = getMakeName(addonVehicle.ModelHash);
+    std::string makeFinal = Utility::GetVehicleMakeGxt(addonVehicle.ModelHash);
     if (makeFinal.empty())
         makeFinal = "No make";
     extras.push_back("Make: \t" + makeFinal);
-    extras.push_back("Name: \t" + getGxtName(addonVehicle.ModelHash));
+    extras.push_back("Name: \t" + Utility::GetVehicleNameGxt(addonVehicle.ModelHash));
     extras.push_back("Model: \t" + to_lower(getModelName(addonVehicle.ModelHash)));
     if (!modkitsInfo.empty()) {
         extras.push_back("Mod kit ID(s): \t" + modkitsInfo);
     }
-    else {
+    else if (!Versions::IsEnhanced() /* TODO: Re-enable for Enhanced when GetModelInfo */) {
         extras.emplace_back("Mod kit ID(s): \tNone");
     }
     return extras;
