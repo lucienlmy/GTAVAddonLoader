@@ -3,9 +3,10 @@
  * Generating vehicle model list: ScriptHookVDotNet source (drp4lyf/zorg93)
  * Getting vehicle modkit IDs:    Unknown Modder
  * Getting textures from dicts:   Unknown Modder
- * InitVehicleArchetype (Legacy): Unknown Modder
- *                    (Enhanced): avail
- * Find enable mp vehicles:       drp4lyf/zorg93
+ * InitVehicleArchetype (Legacy):       Unknown Modder
+ * InitVehicleArchetype (Enhanced):     avail
+ * Find enable mp vehicles (Legacy):    drp4lyf/zorg93
+ * Find enable mp vehicles (Enhanced):
  */
 
 #include "NativeMemory.hpp"
@@ -82,11 +83,16 @@ void removeHooks() {
     }
 }
 
-void MemoryAccess::Init() {
-    uintptr_t addr;
+void MemoryAccess::initGetModelInfo() {
+    if (Versions::IsEnhanced()) {
+        LOG(Info, "GetModelInfo skipped for Enhanced");
+        GetModelInfo = nullptr;
+        return;
+    }
 
-    if (gameVersion <= 57) {
-        addr = FindPattern(
+    uintptr_t addr;
+    if (gameVersion <= Versions::EGameVersion::L_1_0_1868_1_NOSTEAM) {
+        addr = MemoryAccess::FindPattern(
             "\x0F\xB7\x05\x00\x00\x00\x00"
             "\x45\x33\xC9\x4C\x8B\xDA\x66\x85\xC0"
             "\x0F\x84\x00\x00\x00\x00"
@@ -105,6 +111,7 @@ void MemoryAccess::Init() {
         }
         else {
             GetModelInfo = (GetModelInfo_t)(addr);
+            return;
         }
     }
     else {
@@ -115,13 +122,26 @@ void MemoryAccess::Init() {
         else {
             addr = addr - 0x2C;
             GetModelInfo = (GetModelInfo_t)(addr);
+            return;
         }
+    }
+    GetModelInfo = nullptr;
+}
+
+void MemoryAccess::initEnableCarsGlobal() {
+    if (Versions::IsEnhanced()) {
+        LOG(Info, "Skipping enabling MP cars for Enhanced");
+        return;
     }
 
     // find enable MP cars patterns
     if (findShopController())
         enableCarsGlobal();
+}
 
+void MemoryAccess::Init() {
+    initGetModelInfo();
+    initEnableCarsGlobal();
 }
 
 // Thank you, Unknown Modder!

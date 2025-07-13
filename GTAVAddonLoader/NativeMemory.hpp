@@ -341,6 +341,9 @@ public:
     static std::string GetVehicleMakeName(int modelHash);
     static std::vector<uint16_t> GetVehicleModKits(int modelHash);
 private:
+    static void initGetModelInfo();
+    static void initEnableCarsGlobal();
+
     static bool findShopController();
     static void enableCarsGlobal();
 
