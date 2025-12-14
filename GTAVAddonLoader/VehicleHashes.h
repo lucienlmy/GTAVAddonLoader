@@ -1066,6 +1066,24 @@ static const std::vector<Hash> MoneyFrontsVehicles = {
     0x8D780D37, //  Emergency           POLICEB2            policeb2            Police Bike         
 };
 
+static const std::vector<Hash> ASafehouseInTheHillsVehicles = {
+    0x11291A17, //  Emergency           POLBUFFALO          polbuffalo          Buffalo Cruiser     
+    0x24CE9073, //  Emergency           POLBUFFALO6         polbuffalo6         Buffalo STX Pursuit 
+    0x67278B2E, //  Sports              DRIFTRT3            driftrt3000         RT3000              
+    0x524A05A4, //  Sports Classics     GT750               gt750               GT750               
+    0x35460148, //  Sports Classics     ITALI2              itali2              Itali Classic       
+    0x1E41B223, //  Service             VIVANITE2           vivanite2           Vivanite            
+    0x5F2C43B9, //  Sports Classics     ASTRALE             astrale             Astrale             
+    0x95F6A2C9, //  Super               XTREME              xtreme              X-treme             
+    0xC8163646, //  Super               LUIVA               luiva               Luiva               
+    0xA34F2F09, //  Utility             DKEITORA            driftkeitora        Keitora             
+    0xE8039FA7, //  Utility             KEITORA             keitora             Keitora             
+    0xC4069F5A, //  Coupes              DRIFTSENT2          driftsentinel2      Sentinel XS         
+    0xEA9F9B38, //  Sedans              sentinel6           sentinel6           Sentinel XS4        
+    0xCCFCC32F, //  Muscle              DRIFTDOM9           driftdominator9     Dominator GT        
+    0xC3F57329, //  Super               fmj2                fmj2                FMJ MK V            
+};
+
 inline std::vector<DLCDefinition> buildDLClist() {
     return {
         { DLCDefinition("Original game", OriginalVehicles) },
@@ -1115,5 +1133,6 @@ inline std::vector<DLCDefinition> buildDLClist() {
         { DLCDefinition("Bottom Dollar Bounties", BottomDollarBountiesVehicles) },
         { DLCDefinition("Agents of Sabotage", AgentsOfSabotageVehicles) },
         { DLCDefinition("Money Fronts", MoneyFrontsVehicles) },
+        { DLCDefinition("A Safehouse in the Hills", ASafehouseInTheHillsVehicles)},
     };
 }
