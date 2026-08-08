@@ -73,6 +73,7 @@ const TStringMap sEnglishStrings = {
     { "vehicle.info.make", "Make: \t{value}" },
     { "vehicle.info.name", "Name: \t{value}" },
     { "vehicle.info.model", "Model: \t{value}" },
+    { "vehicle.info.class", "Class: \t{value}" },
     { "vehicle.info.mod_kits", "Mod kit ID(s): \t{value}" },
     { "common.none", "None" },
     { "menu.official_dlc.title", "Official DLC" },

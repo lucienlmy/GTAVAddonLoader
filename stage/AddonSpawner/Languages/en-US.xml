@@ -56,6 +56,7 @@
   <text key="vehicle.info.make">Make: 	{value}</text>
   <text key="vehicle.info.name">Name: 	{value}</text>
   <text key="vehicle.info.model">Model: 	{value}</text>
+  <text key="vehicle.info.class">Class: 	{value}</text>
   <text key="vehicle.info.mod_kits">Mod kit ID(s): 	{value}</text>
   <text key="common.none">None</text>
   <text key="menu.official_dlc.title">Official DLC</text>

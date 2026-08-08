@@ -528,6 +528,7 @@ std::vector<std::string> resolveVehicleInfo(const ModelInfo& addonVehicle) {
     extras.push_back(gLanguage.Format("vehicle.info.make", { { "value", makeFinal } }));
     extras.push_back(gLanguage.Format("vehicle.info.name", { { "value", Utility::GetVehicleNameGxt(addonVehicle.ModelHash) } }));
     extras.push_back(gLanguage.Format("vehicle.info.model", { { "value", to_lower(getModelName(addonVehicle.ModelHash)) } }));
+    extras.push_back(gLanguage.Format("vehicle.info.class", { { "value", Utility::GetVehicleClassGxt(addonVehicle.ModelHash) } }));
     if (!modkitsInfo.empty()) {
         extras.push_back(gLanguage.Format("vehicle.info.mod_kits", { { "value", modkitsInfo } }));
     }
