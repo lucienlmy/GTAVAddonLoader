@@ -340,7 +340,10 @@ void MemoryAccess::enableCarsGlobal() {
 
     const std::string patt617_1 = "2c 01 00 00 20 56 04 00 6e 2e 00 01 5f ? ? ? ? 04 00 6e 2e 00 01";
     const std::string patt1604_0 = "2d ? ? ? ? 2c 01 00 00 56 04 00 6e 2e 00 01 5f ? ? ? ? 04 00 6e 2e 00 01";
-    const std::string patt2802_0 = "2d ? ? ? ? 2c 01 00 00 56 04 00 71 2e 00 01 62 ? ? ? ? 04 00 71 2e 00 01";
+
+    // Updated from
+    // https://github.com/Chiheb-Bacha/ScriptHookVDotNetEnhanced/blob/d756d479337a677cce9853b0cce63471c1fc7b7c/source/core/NativeMemory.cs#L2786
+    const std::string patt2802_0 = "2D ? ? 00 00 2C 01 ? ? 56 04 00 71 2E ? 01 62 ? ? ? ? 04 00 71 2E ? 01";
 
     std::string pattern = patt617_1;
     unsigned int offset = 13;
